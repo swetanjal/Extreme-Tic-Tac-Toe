@@ -26,6 +26,69 @@ class TimedOutExc(Exception):
 def handler(signum, frame):
 	#print 'Signal handler called with signal', signum
 	raise TimedOutExc()
+################################################################################################
+class Team33():
+	def __init__(self):
+		self.board = BigBoard()
+		self.cutoff_depth = 7
+		self.symbol = 'X' # I am playing with symbol
+		self.inf = 1000000000000000000
+	def move(self, board, old_move, flag):
+		self.board = board
+		self.symbol = flag
+		cells = board.find_valid_move_cells(old_move)
+		alpha = -self.inf
+		beta = self.inf
+		bestVal = -self.inf
+		best_move = []
+		for move in cells:
+			val = self.minimax(1, move, -self.inf, self.inf)
+			bestVal = max(bestVal, val)
+			if bestVal > alpha:
+				alpha = val
+				best_move = move
+			if beta <= alpha:
+				break
+		return best_move
+	
+	def heuristic(self):
+		# Evaluate self.board
+		return 0
+	
+	def minimax(self, depth, old_move, alpha, beta):
+		if depth == self.cutoff_depth:
+			return self.heuristic()
+		if depth % 2 == 0:
+			# Maximizing Player
+			bestVal = -self.inf
+			cells = self.board.find_valid_move_cells(old_move)
+			for move in cells:
+				i = old_move[0]
+				j = old_move[1]
+				k = old_move[2]
+				self.board.big_boards_status[i][j][k] = self.symbol
+				bestVal = max(bestVal, self.minimax(depth + 1, move, alpha, beta))
+				self.board.big_boards_status[i][j][k] = '-' # Undo move
+				alpha = max(alpha, bestVal)
+				if beta <= alpha:
+					break
+			return bestVal
+		else:
+			# Minimizing Player
+			bestVal = self.inf
+			cells = self.board.find_valid_move_cells(old_move)
+			for move in cells:
+				i = old_move[0]
+				j = old_move[1]
+				k = old_move[2]
+				self.board.big_boards_status[i][j][k] = self.symbol
+				bestVal = min(bestVal, self.minimax(depth + 1, move, alpha, beta))
+				self.board.big_boards_status[i][j][k] = '-' # Undo move
+				beta = min(beta, bestVal)
+				if beta <= alpha:
+					break
+			return bestVal
+################################################################################################
 
 class Random_Player():
 	def __init__(self):
@@ -356,6 +419,7 @@ if __name__ == '__main__':
 		print '<option> can be 1 => Random player vs. Random player'
 		print '                2 => Human vs. Random Player'
 		print '                3 => Human vs. Human'
+		print '                4 => Our bot '
 		sys.exit(1)
  
 	obj1 = ''
@@ -370,6 +434,10 @@ if __name__ == '__main__':
 		obj2 = Manual_Player()
 	elif option == '3':
 		obj1 = Manual_Player()
+		obj2 = Manual_Player()
+	elif option == '4':
+		print 'Testing Bot as Player 1!'
+		obj1 = Team33()
 		obj2 = Manual_Player()
 	else:
 		print 'Invalid option'
