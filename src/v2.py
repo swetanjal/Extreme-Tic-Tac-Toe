@@ -16,6 +16,8 @@ class v2():
 		self.my_symbol = 'x' # I am playing with symbol
 		self.opp_symbol = 'o'
 		self.inf = 1000000000000000000
+		self.loss = -1000
+		self.win = 1000
 	
 	def move(self, board, old_move, flag):
 		self.board = board
@@ -43,6 +45,7 @@ class v2():
 				best_move = move
 			if beta <= alpha:
 				break
+		print bestVal
 		return best_move
 	
 	def check_small_board_win(self, n, row, col):
@@ -102,26 +105,26 @@ class v2():
 		for i in range(2):
 			for j in range(3):
 				if self.check_small_board_loss(i, j, 0) and self.check_small_board_loss(i, j, 1) and self.check_small_board_loss(i, j, 2):
-					return -self.inf
+					return self.loss
 			for j in range(3):
 				if self.check_small_board_loss(i, 0, j) and self.check_small_board_loss(i, 1, j) and self.check_small_board_loss(i, 2, j):
-					return -self.inf
+					return self.loss
 			if self.check_small_board_loss(i, 0, 0) and self.check_small_board_loss(i, 1, 1) and self.check_small_board_loss(i, 2, 2):
-				return -self.inf
+				return self.loss
 			if self.check_small_board_loss(i, 0, 2) and self.check_small_board_loss(i, 1, 1) and self.check_small_board_loss(i, 2, 0):
-				return -self.inf
+				return self.loss
 		
 		for i in range(2):
 			for j in range(3):
 				if self.check_small_board_win(i, j, 0) and self.check_small_board_win(i, j, 1) and self.check_small_board_win(i, j, 2):
-					return self.inf
+					return self.win
 			for j in range(3):
 				if self.check_small_board_win(i, 0, j) and self.check_small_board_win(i, 1, j) and self.check_small_board_win(i, 2, j):
-					return self.inf
+					return self.win
 			if self.check_small_board_win(i, 0, 0) and self.check_small_board_win(i, 1, 1) and self.check_small_board_win(i, 2, 2):
-				return self.inf
+				return self.win
 			if self.check_small_board_win(i, 0, 2) and self.check_small_board_win(i, 1, 1) and self.check_small_board_win(i, 2, 0):
-				return self.inf
+				return self.win
         
 		for i in range(2):
 			for j in range(3):
@@ -138,9 +141,9 @@ class v2():
 	
 	def minimax(self, depth, old_move, alpha, beta):
 		if self.board.find_terminal_state()[0] == self.my_symbol:
-			return self.inf
+			return self.win
 		if self.board.find_terminal_state()[0] == self.opp_symbol:
-			return -self.inf
+			return self.loss
 		
 		if depth == self.cutoff_depth:
 			return self.heuristic()
