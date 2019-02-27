@@ -56,7 +56,7 @@ class Team33():
 			self.board.big_boards_status[i][j][k] = '-'
 			bestVal = max(bestVal, val)
 			if bestVal > alpha:
-				alpha = val
+				alpha = bestVal
 				best_move = move
 			if beta <= alpha:
 				break
