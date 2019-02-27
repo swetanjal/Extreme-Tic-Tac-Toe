@@ -36,15 +36,25 @@ class v2():
 			i = move[0]
 			j = move[1]
 			k = move[2]
-			self.board.big_boards_status[i][j][k] = self.my_symbol
-			val = self.minimax(1, move, alpha, beta)
+			# self.board.big_boards_status[i][j][k] = self.my_symbol
+			temp = copy.deepcopy(self.board.small_boards_status)
+			bonus_move = self.board.update(old_move, move, self.my_symbol)[1]
+			if(bonus_move is True):
+				val = self.minimax(0,move,alpha,beta)
+			else:	
+				val = self.minimax(1, move, alpha, beta)
+				
+			# Undo move
 			self.board.big_boards_status[i][j][k] = '-'
+			self.board.small_boards_status = temp
+
 			bestVal = max(bestVal, val)
 			if bestVal > alpha:
 				alpha = bestVal
 				best_move = move
 			if beta <= alpha:
 				break
+
 		print bestVal
 		return best_move
 	
@@ -126,6 +136,8 @@ class v2():
 			if self.check_small_board_win(i, 0, 2) and self.check_small_board_win(i, 1, 1) and self.check_small_board_win(i, 2, 0):
 				return self.win
         
+
+		
 		for i in range(2):
 			for j in range(3):
 				for k in range(3):
@@ -152,6 +164,10 @@ class v2():
 		if depth == self.cutoff_depth:
 			return self.heuristic()
 		if depth % 2 == 0:
+			# if depth is 2:
+			# 	print("2222222222222222222")
+			# else:
+			# 	print("Max at depth" + str(depth))
 			# Maximizing Player
 			bestVal = -self.inf
 			cells = self.board.find_valid_move_cells(old_move)
@@ -159,32 +175,43 @@ class v2():
 				i = move[0]
 				j = move[1]
 				k = move[2]
+				temp = copy.deepcopy(self.board.small_boards_status)
 				bonus_move = self.board.update(old_move, move, self.my_symbol)[1]
 				#self.board.big_boards_status[i][j][k] = self.my_symbol
 				if bonus_move == True:
 					bestVal = max(bestVal, self.minimax(depth, move, alpha, beta))
 				else:
 					bestVal = max(bestVal, self.minimax(depth + 1, move, alpha, beta))
-				self.board.big_boards_status[i][j][k] = '-' # Undo move
+					
+				# Undo move
+				self.board.big_boards_status[i][j][k] = '-' 
+				self.board.small_boards_status = temp
+
 				alpha = max(alpha, bestVal)
 				if beta <= alpha:
 					break
 			return bestVal
 		else:
 			# Minimizing Player
+			# print("Min at depth" + str(depth))
 			bestVal = self.inf
 			cells = self.board.find_valid_move_cells(old_move)
 			for move in cells:
 				i = move[0]
 				j = move[1]
 				k = move[2]
+				temp = copy.deepcopy(self.board.small_boards_status)
 				bonus_move = self.board.update(old_move, move, self.opp_symbol)[1]
 				#self.board.big_boards_status[i][j][k] = self.opp_symbol
 				if bonus_move == True:
 					bestVal = min(bestVal, self.minimax(depth, move, alpha, beta))
 				else:
 					bestVal = min(bestVal, self.minimax(depth + 1, move, alpha, beta))
-				self.board.big_boards_status[i][j][k] = '-' # Undo move
+				
+				# Undo move
+				self.board.big_boards_status[i][j][k] = '-' 
+				self.board.small_boards_status = temp
+
 				beta = min(beta, bestVal)
 				if beta <= alpha:
 					break
