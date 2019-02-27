@@ -9,7 +9,10 @@ Naming convention followed across the simulator is:
 - small_board[i] = cell[0] + cell[1] + cell[2] + .... + cell[7] + cell[8]
 
 '''
-
+####### Import different versions #########
+from v1 import v1
+from v2 import v2
+###########################################
 import sys
 import random
 import signal
@@ -17,7 +20,7 @@ import time
 import copy
 import traceback
 
-TIME = 24
+TIME = 1000
 MAX_PTS = 86
 
 class TimedOutExc(Exception):
@@ -26,118 +29,7 @@ class TimedOutExc(Exception):
 def handler(signum, frame):
 	#print 'Signal handler called with signal', signum
 	raise TimedOutExc()
-################################################################################################
-class Team33():
-	def __init__(self):
-		self.board = BigBoard()
-		self.cutoff_depth = 5
-		self.my_symbol = 'x' # I am playing with symbol
-		self.opp_symbol = 'o'
-		self.inf = 1000000000000000000
-	def move(self, board, old_move, flag):
-		self.board = board
-		if flag == 'x':
-			self.my_symbol = 'x'
-			self.opp_symbol = 'o'
-		else:
-			self.my_symbol = 'o'
-			self.opp_symbol = 'x'
-		cells = board.find_valid_move_cells(old_move)
-		alpha = -self.inf
-		beta = self.inf
-		bestVal = -self.inf
-		best_move = []
-		for move in cells:
-			i = move[0]
-			j = move[1]
-			k = move[2]
-			self.board.big_boards_status[i][j][k] = self.my_symbol
-			val = self.minimax(1, move, alpha, beta)
-			self.board.big_boards_status[i][j][k] = '-'
-			bestVal = max(bestVal, val)
-			if bestVal > alpha:
-				alpha = bestVal
-				best_move = move
-			if beta <= alpha:
-				break
-		return best_move
-	
-	def check_small_board_win(self, n, row, col):
-		"""
-		This function returns whether I have won [row,col] small square in big board n
-		"""
-		
-		# Indices in board array of the top left corner
-		i = 3 * row
-		j = 3 * col
-		for tmp in range(3):
-			if self.board.big_boards_status[n][i][j + tmp] == self.my_symbol and self.board.big_boards_status[n][i + 1][j + tmp] == self.my_symbol and self.board.big_boards_status[n][i + 2][j + tmp] == self.my_symbol:
-				# Winning column
-				return True
-		for tmp in range(3):
-			if self.board.big_boards_status[n][i + tmp][j] == self.my_symbol and self.board.big_boards_status[n][i + tmp][j + 1] == self.my_symbol and self.board.big_boards_status[n][i + tmp][j + 2] == self.my_symbol:
-				# Winning row
-				return True
-		
-		# Winning diagnol
-		if self.board.big_boards_status[n][i][j] == self.my_symbol and self.board.big_boards_status[n][i + 1][j + 1] == self.my_symbol and self.board.big_boards_status[n][i + 2][j + 2] == self.my_symbol:
-			return True
-		
-		if self.board.big_boards_status[n][i][j + 2] == self.my_symbol and self.board.big_boards_status[n][i + 1][j + 1] == self.my_symbol and self.board.big_boards_status[n][i + 2][j] == self.my_symbol:
-			return True
-		
-		return False
 
-	def heuristic(self):
-		# Evaluate self.board
-		score = 0
-		for i in range(2):
-			for j in range(3):
-				for k in range(3):
-					res = self.check_small_board_win(i, j, k)
-					if res:
-						if j == 2 and k == 2:
-							score = score + 3
-						elif (j == 0 and k == 0) or (j == 0 and k == 2) or (j == 2 and k == 0) or (j ==2 and k == 2):
-							score = score + 4
-						else:
-							score = score + 6
-		return score
-	
-	def minimax(self, depth, old_move, alpha, beta):
-		if depth == self.cutoff_depth:
-			return self.heuristic()
-		if depth % 2 == 0:
-			# Maximizing Player
-			bestVal = -self.inf
-			cells = self.board.find_valid_move_cells(old_move)
-			for move in cells:
-				i = move[0]
-				j = move[1]
-				k = move[2]
-				self.board.big_boards_status[i][j][k] = self.my_symbol
-				bestVal = max(bestVal, self.minimax(depth + 1, move, alpha, beta))
-				self.board.big_boards_status[i][j][k] = '-' # Undo move
-				alpha = max(alpha, bestVal)
-				if beta <= alpha:
-					break
-			return bestVal
-		else:
-			# Minimizing Player
-			bestVal = self.inf
-			cells = self.board.find_valid_move_cells(old_move)
-			for move in cells:
-				i = move[0]
-				j = move[1]
-				k = move[2]
-				self.board.big_boards_status[i][j][k] = self.opp_symbol
-				bestVal = min(bestVal, self.minimax(depth + 1, move, alpha, beta))
-				self.board.big_boards_status[i][j][k] = '-' # Undo move
-				beta = min(beta, bestVal)
-				if beta <= alpha:
-					break
-			return bestVal
-################################################################################################
 
 class Random_Player():
 	def __init__(self):
@@ -487,16 +379,16 @@ if __name__ == '__main__':
 		obj2 = Manual_Player()
 	elif option == '4':
 		print 'Testing Team33 Bot as Player 1 and a human player as player 2'
-		obj1 = Team33()
+		obj1 = v2()
 		obj2 = Manual_Player()
 	elif option == '5':
 		print 'Testing Team33 Bot as Player 1 and a random player as player 2'
-		obj1 = Team33()
+		obj1 = v1()
 		obj2 = Random_Player()
 	elif option == '6':
-		print 'Testing Team33 Bot as Player 1 and Team33 Bot as player 2'
-		obj1 = Team33()
-		obj2 = Team33()
+		print 'Testing Team33v1 Bot as Player 1 and Team33v2 Bot as player 2'
+		obj1 = v1()
+		obj2 = v2()
 	else:
 		print 'Invalid option'
 		sys.exit(1)
