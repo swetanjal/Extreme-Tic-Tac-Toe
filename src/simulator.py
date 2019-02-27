@@ -30,7 +30,7 @@ def handler(signum, frame):
 class Team33():
 	def __init__(self):
 		self.board = BigBoard()
-		self.cutoff_depth = 7
+		self.cutoff_depth = 5
 		self.my_symbol = 'x' # I am playing with symbol
 		self.opp_symbol = 'o'
 		self.inf = 1000000000000000000
@@ -62,9 +62,47 @@ class Team33():
 				break
 		return best_move
 	
+	def check_small_board_win(self, n, row, col):
+		"""
+		This function returns whether I have won [row,col] small square in big board n
+		"""
+		
+		# Indices in board array of the top left corner
+		i = 3 * row
+		j = 3 * col
+		for tmp in range(3):
+			if self.board.big_boards_status[n][i][j + tmp] == self.my_symbol and self.board.big_boards_status[n][i + 1][j + tmp] == self.my_symbol and self.board.big_boards_status[n][i + 2][j + tmp] == self.my_symbol:
+				# Winning column
+				return True
+		for tmp in range(3):
+			if self.board.big_boards_status[n][i + tmp][j] == self.my_symbol and self.board.big_boards_status[n][i + tmp][j + 1] == self.my_symbol and self.board.big_boards_status[n][i + tmp][j + 2] == self.my_symbol:
+				# Winning row
+				return True
+		
+		# Winning diagnol
+		if self.board.big_boards_status[n][i][j] == self.my_symbol and self.board.big_boards_status[n][i + 1][j + 1] == self.my_symbol and self.board.big_boards_status[n][i + 2][j + 2] == self.my_symbol:
+			return True
+		
+		if self.board.big_boards_status[n][i][j + 2] == self.my_symbol and self.board.big_boards_status[n][i + 1][j + 1] == self.my_symbol and self.board.big_boards_status[n][i + 2][j] == self.my_symbol:
+			return True
+		
+		return False
+
 	def heuristic(self):
 		# Evaluate self.board
-		return 0
+		score = 0
+		for i in range(2):
+			for j in range(3):
+				for k in range(3):
+					res = self.check_small_board_win(i, j, k)
+					if res:
+						if j == 2 and k == 2:
+							score = score + 3
+						elif (j == 0 and k == 0) or (j == 0 and k == 2) or (j == 2 and k == 0) or (j ==2 and k == 2):
+							score = score + 4
+						else:
+							score = score + 6
+		return score
 	
 	def minimax(self, depth, old_move, alpha, beta):
 		if depth == self.cutoff_depth:
@@ -430,7 +468,8 @@ if __name__ == '__main__':
 		print '<option> can be 1 => Random player vs. Random player'
 		print '                2 => Human vs. Random Player'
 		print '                3 => Human vs. Human'
-		print '                4 => Our bot '
+		print '                4 => Our bot vs Human Player'
+		print '                5 => Our bot vs Random'
 		sys.exit(1)
  
 	obj1 = ''
@@ -447,9 +486,17 @@ if __name__ == '__main__':
 		obj1 = Manual_Player()
 		obj2 = Manual_Player()
 	elif option == '4':
-		print 'Testing Bot as Player 1!'
+		print 'Testing Team33 Bot as Player 1 and a human player as player 2'
 		obj1 = Team33()
 		obj2 = Manual_Player()
+	elif option == '5':
+		print 'Testing Team33 Bot as Player 1 and a random player as player 2'
+		obj1 = Team33()
+		obj2 = Random_Player()
+	elif option == '6':
+		print 'Testing Team33 Bot as Player 1 and Team33 Bot as player 2'
+		obj1 = Team33()
+		obj2 = Team33()
 	else:
 		print 'Invalid option'
 		sys.exit(1)
