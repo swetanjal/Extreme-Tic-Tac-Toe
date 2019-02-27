@@ -9,7 +9,7 @@ import traceback
 TIME = 24
 MAX_PTS = 86
 ################################################################################################
-class v2():
+class v3():
 	def __init__(self):
 		#self.board = BigBoard()
 		self.cutoff_depth = 4
@@ -106,9 +106,11 @@ class v2():
 			return True
 		
 		return False
-
+    
+    
 	def heuristic(self):
 		# Evaluate self.board
+		############################################# MY SCORE #########################################################
 		score = 0
 		for i in range(2):
 			for j in range(3):
@@ -133,8 +135,6 @@ class v2():
 				return self.win
 			if self.check_small_board_win(i, 0, 2) and self.check_small_board_win(i, 1, 1) and self.check_small_board_win(i, 2, 0):
 				return self.win
-        
-
 		
 		for i in range(2):
 			for j in range(3):
@@ -147,7 +147,23 @@ class v2():
 							score = score + 4
 						else:
 							score = score + 6
-		return score	
+        ###################################################################################################################
+		my_score = score
+        ############################################# OPPONENT SCORE ########################################################
+		score = 0
+		for i in range(2):
+			for j in range(3):
+				for k in range(3):
+					res = self.check_small_board_loss(i, j, k)
+					if res:
+						if j == 2 and k == 2:
+							score = score + 3
+						elif (j == 0 and k == 0) or (j == 0 and k == 2) or (j == 2 and k == 0) or (j ==2 and k == 2):
+							score = score + 4
+						else:
+							score = score + 6
+		#####################################################################################################################
+		return (my_score - score)	
 	
 	def minimax(self, depth, old_move, alpha, beta):
 		#if self.board.find_terminal_state()[0] == self.my_symbol:

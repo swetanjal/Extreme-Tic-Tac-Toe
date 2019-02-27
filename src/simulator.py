@@ -12,6 +12,7 @@ Naming convention followed across the simulator is:
 ####### Import different versions #########
 from v1 import v1
 from v2 import v2
+from v3 import v3
 ###########################################
 import sys
 import random
@@ -20,7 +21,7 @@ import time
 import copy
 import traceback
 
-TIME = 1000
+TIME = 24
 MAX_PTS = 86
 
 class TimedOutExc(Exception):
@@ -389,6 +390,9 @@ if __name__ == '__main__':
 		print 'Testing Team33v1 Bot as Player 1 and Team33v2 Bot as player 2'
 		obj1 = v1()
 		obj2 = v2()
+	elif option == '7':
+		obj1 = v2()
+		obj2 = v3()
 	else:
 		print 'Invalid option'
 		sys.exit(1)
