@@ -20,7 +20,7 @@ class v2():
 		self.win = 1000
 	
 	def move(self, board, old_move, flag):
-		self.board = board
+		self.board = copy.deepcopy(board)
 		if flag == 'x':
 			self.my_symbol = 'x'
 			self.opp_symbol = 'o'
@@ -140,10 +140,14 @@ class v2():
 		return score	
 	
 	def minimax(self, depth, old_move, alpha, beta):
-		if self.board.find_terminal_state()[0] == self.my_symbol:
-			return self.win
-		if self.board.find_terminal_state()[0] == self.opp_symbol:
-			return self.loss
+		#if self.board.find_terminal_state()[0] == self.my_symbol:
+		#	return self.win
+		#if self.board.find_terminal_state()[0] == self.opp_symbol:
+		#	return self.loss
+		#if self.heuristic() == self.win:
+		#	return self.win
+		#if self.heuristic() == self.loss:
+		#	return self.loss
 		
 		if depth == self.cutoff_depth:
 			return self.heuristic()
@@ -155,8 +159,12 @@ class v2():
 				i = move[0]
 				j = move[1]
 				k = move[2]
-				self.board.big_boards_status[i][j][k] = self.my_symbol
-				bestVal = max(bestVal, self.minimax(depth + 1, move, alpha, beta))
+				bonus_move = self.board.update(old_move, move, self.my_symbol)[1]
+				#self.board.big_boards_status[i][j][k] = self.my_symbol
+				if bonus_move == True:
+					bestVal = max(bestVal, self.minimax(depth, move, alpha, beta))
+				else:
+					bestVal = max(bestVal, self.minimax(depth + 1, move, alpha, beta))
 				self.board.big_boards_status[i][j][k] = '-' # Undo move
 				alpha = max(alpha, bestVal)
 				if beta <= alpha:
@@ -170,8 +178,12 @@ class v2():
 				i = move[0]
 				j = move[1]
 				k = move[2]
-				self.board.big_boards_status[i][j][k] = self.opp_symbol
-				bestVal = min(bestVal, self.minimax(depth + 1, move, alpha, beta))
+				bonus_move = self.board.update(old_move, move, self.opp_symbol)[1]
+				#self.board.big_boards_status[i][j][k] = self.opp_symbol
+				if bonus_move == True:
+					bestVal = min(bestVal, self.minimax(depth, move, alpha, beta))
+				else:
+					bestVal = min(bestVal, self.minimax(depth + 1, move, alpha, beta))
 				self.board.big_boards_status[i][j][k] = '-' # Undo move
 				beta = min(beta, bestVal)
 				if beta <= alpha:
