@@ -31,18 +31,29 @@ class Team33():
 	def __init__(self):
 		self.board = BigBoard()
 		self.cutoff_depth = 7
-		self.symbol = 'X' # I am playing with symbol
+		self.my_symbol = 'x' # I am playing with symbol
+		self.opp_symbol = 'o'
 		self.inf = 1000000000000000000
 	def move(self, board, old_move, flag):
 		self.board = board
-		self.symbol = flag
+		if flag == 'x':
+			self.my_symbol = 'x'
+			self.opp_symbol = 'o'
+		else:
+			self.my_symbol = 'o'
+			self.opp_symbol = 'x'
 		cells = board.find_valid_move_cells(old_move)
 		alpha = -self.inf
 		beta = self.inf
 		bestVal = -self.inf
 		best_move = []
 		for move in cells:
-			val = self.minimax(1, move, -self.inf, self.inf)
+			i = move[0]
+			j = move[1]
+			k = move[2]
+			self.board.big_boards_status[i][j][k] = self.my_symbol
+			val = self.minimax(1, move, alpha, beta)
+			self.board.big_boards_status[i][j][k] = '-'
 			bestVal = max(bestVal, val)
 			if bestVal > alpha:
 				alpha = val
@@ -63,10 +74,10 @@ class Team33():
 			bestVal = -self.inf
 			cells = self.board.find_valid_move_cells(old_move)
 			for move in cells:
-				i = old_move[0]
-				j = old_move[1]
-				k = old_move[2]
-				self.board.big_boards_status[i][j][k] = self.symbol
+				i = move[0]
+				j = move[1]
+				k = move[2]
+				self.board.big_boards_status[i][j][k] = self.my_symbol
 				bestVal = max(bestVal, self.minimax(depth + 1, move, alpha, beta))
 				self.board.big_boards_status[i][j][k] = '-' # Undo move
 				alpha = max(alpha, bestVal)
@@ -78,10 +89,10 @@ class Team33():
 			bestVal = self.inf
 			cells = self.board.find_valid_move_cells(old_move)
 			for move in cells:
-				i = old_move[0]
-				j = old_move[1]
-				k = old_move[2]
-				self.board.big_boards_status[i][j][k] = self.symbol
+				i = move[0]
+				j = move[1]
+				k = move[2]
+				self.board.big_boards_status[i][j][k] = self.opp_symbol
 				bestVal = min(bestVal, self.minimax(depth + 1, move, alpha, beta))
 				self.board.big_boards_status[i][j][k] = '-' # Undo move
 				beta = min(beta, bestVal)
