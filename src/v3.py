@@ -166,22 +166,13 @@ class v3():
 		return (my_score - score)	
 	
 	def minimax(self, depth, old_move, alpha, beta):
-		#if self.board.find_terminal_state()[0] == self.my_symbol:
-		#	return self.win
-		#if self.board.find_terminal_state()[0] == self.opp_symbol:
-		#	return self.loss
-		#if self.heuristic() == self.win:
-		#	return self.win
-		#if self.heuristic() == self.loss:
-		#	return self.loss
-		
+		if self.board.find_terminal_state()[0] == self.my_symbol:
+			return self.win
+		if self.board.find_terminal_state()[0] == self.opp_symbol:
+			return self.loss
 		if depth == self.cutoff_depth:
 			return self.heuristic()
 		if depth % 2 == 0:
-			# if depth is 2:
-			# 	print("2222222222222222222")
-			# else:
-			# 	print("Max at depth" + str(depth))
 			# Maximizing Player
 			bestVal = -self.inf
 			cells = self.board.find_valid_move_cells(old_move)
@@ -207,7 +198,6 @@ class v3():
 			return bestVal
 		else:
 			# Minimizing Player
-			# print("Min at depth" + str(depth))
 			bestVal = self.inf
 			cells = self.board.find_valid_move_cells(old_move)
 			for move in cells:

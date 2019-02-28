@@ -391,7 +391,7 @@ if __name__ == '__main__':
 		obj1 = v1()
 		obj2 = v2()
 	elif option == '7':
-		obj1 = v2()
+		obj1 = v3()
 		obj2 = v3()
 	else:
 		print 'Invalid option'
