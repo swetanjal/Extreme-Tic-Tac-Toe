@@ -14,6 +14,7 @@ from v1 import v1
 from v2 import v2
 from v3 import v3
 from v4 import v4
+from v5 import v5
 ###########################################
 import sys
 import random
@@ -395,12 +396,14 @@ if __name__ == '__main__':
 		obj1 = v3()
 		obj2 = v3()
 	elif option == '8':
-		obj1 = v4()
-		obj2 = v3()
+		obj1 = v3()
+		obj2 = v4()
+	elif option == '9':
+		obj1 = v5()
+		obj2 = v4()
 	else:
 		print 'Invalid option'
 		sys.exit(1)
-
 	x = gameplay(obj1, obj2)
 	print "Player 1 points:", x[0] 
 	print "Player 2 points:", x[1]

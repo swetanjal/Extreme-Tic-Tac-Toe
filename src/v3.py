@@ -156,7 +156,7 @@ class v3():
 				for k in range(3):
 					res = self.check_small_board_loss(i, j, k)
 					if res:
-						if j == 2 and k == 2:
+						if j == 1 and k == 1:
 							score = score + 3
 						elif (j == 0 and k == 0) or (j == 0 and k == 2) or (j == 2 and k == 0) or (j ==2 and k == 2):
 							score = score + 4

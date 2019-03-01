@@ -11,7 +11,7 @@ MAX_PTS = 86
 ################################################################################################
 
 
-class v4():
+class v5():
 	def __init__(self):
 		#self.board = BigBoard()
 		self.cutoff_depth = 5
@@ -42,9 +42,9 @@ class v4():
 			temp = copy.deepcopy(self.board.small_boards_status)
 			bonus_move = self.board.update(old_move, move, self.my_symbol)[1]
 			if(bonus_move is True):
-				val = self.minimax(0, move, alpha, beta)
+				val = self.minimax(1, move, alpha, beta, 0, 1)
 			else:
-				val = self.minimax(1, move, alpha, beta)
+				val = self.minimax(1, move, alpha, beta, 1, 0)
 
 			# Undo move
 			self.board.big_boards_status[i][j][k] = '-'
@@ -57,7 +57,6 @@ class v4():
 			if beta <= alpha:
 				break
 
-		print bestVal
 		return best_move
 
 
@@ -228,7 +227,7 @@ class v4():
 		
 		return score
 
-	def minimax(self, depth, old_move, alpha, beta):
+	def minimax(self, depth, old_move, alpha, beta, turn, cons):
 
 		if self.board.find_terminal_state()[0] == self.my_symbol:
 			return self.win
@@ -237,7 +236,7 @@ class v4():
 
 		if depth == self.cutoff_depth:
 			return self.heuristic(old_move)
-		if depth % 2 == 0:
+		if turn == 0:
 
 			# Maximizing Player
 			bestVal = -self.inf
@@ -248,10 +247,10 @@ class v4():
 				k = move[2]
 				temp = copy.deepcopy(self.board.small_boards_status)
 				bonus_move = self.board.update(old_move, move, self.my_symbol)[1]
-				if bonus_move == True:
-					bestVal = max(bestVal, self.minimax(depth, move, alpha, beta))
+				if bonus_move == True and cons == 0:
+					bestVal = max(bestVal, self.minimax(depth + 1, move, alpha, beta, turn, 1))
 				else:
-					bestVal = max(bestVal, self.minimax(depth + 1, move, alpha, beta))
+					bestVal = max(bestVal, self.minimax(depth + 1, move, alpha, beta, 1 - turn, 0))
 
 				# Undo move
 				self.board.big_boards_status[i][j][k] = '-'
@@ -271,10 +270,10 @@ class v4():
 				k = move[2]
 				temp = copy.deepcopy(self.board.small_boards_status)
 				bonus_move = self.board.update(old_move, move, self.opp_symbol)[1]
-				if bonus_move == True:
-					bestVal = min(bestVal, self.minimax(depth, move, alpha, beta))
+				if bonus_move == True and cons == 0:
+					bestVal = min(bestVal, self.minimax(depth + 1, move, alpha, beta, turn, 1))
 				else:
-					bestVal = min(bestVal, self.minimax(depth + 1, move, alpha, beta))
+					bestVal = min(bestVal, self.minimax(depth + 1, move, alpha, beta, 1 - turn, 0))
 
 				# Undo move
 				self.board.big_boards_status[i][j][k] = '-'
