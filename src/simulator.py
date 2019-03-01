@@ -15,6 +15,7 @@ from v2 import v2
 from v3 import v3
 from v4 import v4
 from v5 import v5
+from v6 import v6
 ###########################################
 import sys
 import random
@@ -399,8 +400,14 @@ if __name__ == '__main__':
 		obj1 = v3()
 		obj2 = v4()
 	elif option == '9':
-		obj1 = v5()
+		obj1 = v4()
 		obj2 = v4()
+	elif option == '10':
+		obj1 = v5()
+		obj2 = v5()
+	elif option == '11':
+		obj1 = v6()
+		obj2 = v5()
 	else:
 		print 'Invalid option'
 		sys.exit(1)
