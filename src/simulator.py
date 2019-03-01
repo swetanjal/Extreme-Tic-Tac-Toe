@@ -13,6 +13,7 @@ Naming convention followed across the simulator is:
 from v1 import v1
 from v2 import v2
 from v3 import v3
+from v4 import v4
 ###########################################
 import sys
 import random
@@ -392,6 +393,9 @@ if __name__ == '__main__':
 		obj2 = v2()
 	elif option == '7':
 		obj1 = v3()
+		obj2 = v3()
+	elif option == '8':
+		obj1 = v4()
 		obj2 = v3()
 	else:
 		print 'Invalid option'
