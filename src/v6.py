@@ -40,6 +40,11 @@ class v6():
 		self.cutoff_depth = 3
 		best_move = []
 		moves = []
+		scores = []
+		cons = 0
+		if ( self.board.big_boards_status[old_move[0]][old_move[1]][old_move[2]] == self.my_symbol ):
+			cons = 1
+
 		while (self.curr_time - self.start_time) <= self.cutoff_time:
 			alpha = -self.inf
 			beta = self.inf
@@ -52,7 +57,9 @@ class v6():
 				# self.board.big_boards_status[i][j][k] = self.my_symbol
 				temp = copy.deepcopy(self.board.small_boards_status)
 				bonus_move = self.board.update(old_move, move, self.my_symbol)[1]
-				if(bonus_move is True):
+
+
+				if(bonus_move is True and cons == 0):
 					val = self.minimax(1, move, alpha, beta, 0, 1)
 				else:
 					val = self.minimax(1, move, alpha, beta, 1, 0)
@@ -68,8 +75,10 @@ class v6():
 				if beta <= alpha:
 					break
 			moves.append(best_move)
+			scores.append(bestVal)
 			self.cutoff_depth = self.cutoff_depth + 1
 		l = len(moves)
+		print scores
 		if self.time_out == 1:
 			return moves[l - 2]
 		else:
