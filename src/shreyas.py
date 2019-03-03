@@ -11,7 +11,7 @@ MAX_PTS = 86
 ################################################################################################
 
 
-class v7():
+class Shrey():
 	def __init__(self):
 		#self.board = BigBoard()
 		self.cutoff_depth = 5
@@ -24,6 +24,18 @@ class v7():
 		self.curr_time = 0
 		self.start_time = 0
 		self.time_out = 0
+
+		self.randBigBoard = [[[[long(0) for l in range(2)]for k in range(9)]for j in range(9)]for i in range(2)]
+		self.hashScore = {}
+		self.hashVal = 0
+		self.hash_init()
+	def hash_init(self):
+		for i in range(2):
+			for j in range(9):
+				for k in range(9):
+					for l in range(2):
+						self.randBigBoard[i][j][k][l] = long(random.randint(3, 2 ** 64))
+
 
 	def move(self, board, old_move, flag):
 
@@ -39,6 +51,15 @@ class v7():
 		else:
 			self.my_symbol = 'o'
 			self.opp_symbol = 'x'
+		############ Hashing ##############
+		for i in range(2):
+			for j in range(9):
+				for k in range(9):
+					if self.board.big_boards_status[i][j][k] == self.my_symbol:
+						self.hashVal = self.hashVal ^ self.randBigBoard[i][j][k][0]
+					elif self.board.big_boards_status[i][j][k] == self.opp_symbol:
+						self.hashVal = self.hashVal ^ self.randBigBoard[i][j][k][1]
+		###################################
 		cells = board.find_valid_move_cells(old_move)
 		self.curr_time = time.time()
 		self.cutoff_depth = 3
@@ -61,7 +82,7 @@ class v7():
 				# self.board.big_boards_status[i][j][k] = self.my_symbol
 				temp = copy.deepcopy(self.board.small_boards_status)
 				bonus_move = self.board.update(old_move, move, self.my_symbol)[1]
-
+				self.hashVal = self.hashVal ^ self.randBigBoard[i][j][k][0]
 
 				if(bonus_move is True and cons == 0):
 					val = self.minimax(1, move, alpha, beta, 0, 1)
@@ -71,7 +92,7 @@ class v7():
 				# Undo move
 				self.board.big_boards_status[i][j][k] = '-'
 				self.board.small_boards_status = temp
-
+				self.hashVal = self.hashVal ^ self.randBigBoard[i][j][k][0]
 				bestVal = max(bestVal, val)
 
 				# if bestVal == self.win:
@@ -250,7 +271,8 @@ class v7():
 	def heuristic(self,move):
 		# Evaluate self.board
 		score = 0
-
+		if self.hashVal in self.hashScore:
+			return self.hashScore[self.hashVal]
 
 		# win = self.check_small_board_status(move)
 
@@ -293,6 +315,7 @@ class v7():
 						elif(pos_y == 1 and pos_y == 1):
 							score = score + 0.005
 		
+		self.hashScore[self.hashVal] = score
 		return score
 
 
@@ -300,9 +323,9 @@ class v7():
 	def minimax(self, depth, old_move, alpha, beta, turn, cons):
 
 		if self.board.find_terminal_state()[0] == self.my_symbol:
-			return self.win*(165 - depth)
+			return self.win*(20 - depth)
 		if self.board.find_terminal_state()[0] == self.opp_symbol:
-			return self.loss*(165 - depth)
+			return self.loss*(20 - depth)
 
 
 
@@ -319,6 +342,7 @@ class v7():
 				i = move[0]
 				j = move[1]
 				k = move[2]
+				self.hashVal = self.hashVal ^ self.randBigBoard[i][j][k][0]
 				temp = copy.deepcopy(self.board.small_boards_status)
 				bonus_move = self.board.update(old_move, move, self.my_symbol)[1]
 				if bonus_move == True and cons == 0:
@@ -329,7 +353,7 @@ class v7():
 				# Undo move
 				self.board.big_boards_status[i][j][k] = '-'
 				self.board.small_boards_status = temp
-
+				self.hashVal = self.hashVal ^ self.randBigBoard[i][j][k][0]
 				alpha = max(alpha, bestVal)
 				if beta <= alpha:
 					break
@@ -346,6 +370,7 @@ class v7():
 				k = move[2]
 				temp = copy.deepcopy(self.board.small_boards_status)
 				bonus_move = self.board.update(old_move, move, self.opp_symbol)[1]
+				self.hashVal = self.hashVal ^ self.randBigBoard[i][j][k][1]
 				if bonus_move == True and cons == 0:
 					bestVal = min(bestVal, self.minimax(depth + 1, move, alpha, beta, turn, 1))
 				else:
@@ -354,7 +379,7 @@ class v7():
 				# Undo move
 				self.board.big_boards_status[i][j][k] = '-'
 				self.board.small_boards_status = temp
-
+				self.hashVal = self.hashVal ^ self.randBigBoard[i][j][k][1]
 				beta = min(beta, bestVal)
 				if beta <= alpha:
 					break

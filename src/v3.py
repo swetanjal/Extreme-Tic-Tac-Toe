@@ -6,20 +6,46 @@ import time
 import copy
 import traceback
 
-TIME = 24
+TIME = 1000
 MAX_PTS = 86
 ################################################################################################
-class v3():
+
+
+class Shrey2():
 	def __init__(self):
 		#self.board = BigBoard()
-		self.cutoff_depth = 4
-		self.my_symbol = 'x' # I am playing with symbol
+		self.cutoff_depth = 5
+		self.cutoff_time = 20
+		self.my_symbol = 'x'  # I am playing with symbol
 		self.opp_symbol = 'o'
-		self.inf = 1000000000000000000
-		self.loss = -1000
-		self.win = 1000
-	
+		self.inf = long(1000000000000000000)
+		self.loss = long(-1 * 100000000)
+		self.win = long(100000000)
+		self.curr_time = 0
+		self.start_time = 0
+		self.time_out = 0
+
+		self.randBigBoard = [[[[long(0) for l in range(2)]for k in range(9)]for j in range(9)]for i in range(2)]
+		self.hashScore = {}
+		self.hashVal = 0
+		self.hash_init()
+
+
+	def hash_init(self):
+		for i in range(2):
+			for j in range(9):
+				for k in range(9):
+					for l in range(2):
+						self.randBigBoard[i][j][k][l] = long(random.randint(3, 2 ** 64))
+
+
 	def move(self, board, old_move, flag):
+
+		if(old_move[0] == -1 and old_move[1] == -1 and old_move[2] == -1):
+			print old_move
+			return (0,4,4)
+		self.start_time = time.time()
+		self.time_out = 0
 		self.board = copy.deepcopy(board)
 		if flag == 'x':
 			self.my_symbol = 'x'
@@ -27,195 +53,358 @@ class v3():
 		else:
 			self.my_symbol = 'o'
 			self.opp_symbol = 'x'
+		############ Hashing ##############
+		for i in range(2):
+			for j in range(9):
+				for k in range(9):
+					if self.board.big_boards_status[i][j][k] == self.my_symbol:
+						self.hashVal = self.hashVal ^ self.randBigBoard[i][j][k][0]
+					elif self.board.big_boards_status[i][j][k] == self.opp_symbol:
+						self.hashVal = self.hashVal ^ self.randBigBoard[i][j][k][1]
+		###################################
 		cells = board.find_valid_move_cells(old_move)
-		alpha = -self.inf
-		beta = self.inf
-		bestVal = -self.inf
+		self.curr_time = time.time()
+		self.cutoff_depth = 3
 		best_move = []
-		for move in cells:
-			i = move[0]
-			j = move[1]
-			k = move[2]
-			# self.board.big_boards_status[i][j][k] = self.my_symbol
-			temp = copy.deepcopy(self.board.small_boards_status)
-			bonus_move = self.board.update(old_move, move, self.my_symbol)[1]
-			if(bonus_move is True):
-				val = self.minimax(0,move,alpha,beta)
-			else:	
-				val = self.minimax(1, move, alpha, beta)
-				
-			# Undo move
-			self.board.big_boards_status[i][j][k] = '-'
-			self.board.small_boards_status = temp
+		moves = []
+		scores = []
+		cons = 0
+		if (self.board.big_boards_status[old_move[0]][old_move[1]][old_move[2]] == self.my_symbol ):
+			cons = 1
 
-			bestVal = max(bestVal, val)
-			if bestVal > alpha:
-				alpha = bestVal
-				best_move = move
-			if beta <= alpha:
-				break
-		return best_move
-	
-	def check_small_board_win(self, n, row, col):
-		"""
-		This function returns whether I have won [row,col] small square in big board n
-		"""
-		
-		# Indices in board array of the top left corner
-		i = 3 * row
-		j = 3 * col
-		for tmp in range(3):
-			if self.board.big_boards_status[n][i][j + tmp] == self.my_symbol and self.board.big_boards_status[n][i + 1][j + tmp] == self.my_symbol and self.board.big_boards_status[n][i + 2][j + tmp] == self.my_symbol:
-				# Winning column
-				return True
-		for tmp in range(3):
-			if self.board.big_boards_status[n][i + tmp][j] == self.my_symbol and self.board.big_boards_status[n][i + tmp][j + 1] == self.my_symbol and self.board.big_boards_status[n][i + tmp][j + 2] == self.my_symbol:
-				# Winning row
-				return True
-		
-		# Winning diagnol
-		if self.board.big_boards_status[n][i][j] == self.my_symbol and self.board.big_boards_status[n][i + 1][j + 1] == self.my_symbol and self.board.big_boards_status[n][i + 2][j + 2] == self.my_symbol:
-			return True
-		
-		if self.board.big_boards_status[n][i][j + 2] == self.my_symbol and self.board.big_boards_status[n][i + 1][j + 1] == self.my_symbol and self.board.big_boards_status[n][i + 2][j] == self.my_symbol:
-			return True
-		
-		return False
-    
-	def check_small_board_loss(self, n, row, col):
-		"""
-		This function returns whether I have lost [row, col] small square in big board n
-		"""
-		# Indices in board array of the top left corner
-		i = 3 * row
-		j = 3 * col
-		for tmp in range(3):
-			if self.board.big_boards_status[n][i][j + tmp] == self.opp_symbol and self.board.big_boards_status[n][i + 1][j + tmp] == self.opp_symbol and self.board.big_boards_status[n][i + 2][j + tmp] == self.opp_symbol:
-				# Winning column
-				return True
-		for tmp in range(3):
-			if self.board.big_boards_status[n][i + tmp][j] == self.opp_symbol and self.board.big_boards_status[n][i + tmp][j + 1] == self.opp_symbol and self.board.big_boards_status[n][i + tmp][j + 2] == self.opp_symbol:
-				# Winning row
-				return True
-		
-		# Winning diagnol
-		if self.board.big_boards_status[n][i][j] == self.opp_symbol and self.board.big_boards_status[n][i + 1][j + 1] == self.opp_symbol and self.board.big_boards_status[n][i + 2][j + 2] == self.opp_symbol:
-			return True
-		
-		if self.board.big_boards_status[n][i][j + 2] == self.opp_symbol and self.board.big_boards_status[n][i + 1][j + 1] == self.opp_symbol and self.board.big_boards_status[n][i + 2][j] == self.opp_symbol:
-			return True
-		
-		return False
-    
-    
-	def heuristic(self):
-		# Evaluate self.board
-		############################################# MY SCORE #########################################################
-		score = 0
-		for i in range(2):
-			for j in range(3):
-				if self.check_small_board_loss(i, j, 0) and self.check_small_board_loss(i, j, 1) and self.check_small_board_loss(i, j, 2):
-					return self.loss
-			for j in range(3):
-				if self.check_small_board_loss(i, 0, j) and self.check_small_board_loss(i, 1, j) and self.check_small_board_loss(i, 2, j):
-					return self.loss
-			if self.check_small_board_loss(i, 0, 0) and self.check_small_board_loss(i, 1, 1) and self.check_small_board_loss(i, 2, 2):
-				return self.loss
-			if self.check_small_board_loss(i, 0, 2) and self.check_small_board_loss(i, 1, 1) and self.check_small_board_loss(i, 2, 0):
-				return self.loss
-		
-		for i in range(2):
-			for j in range(3):
-				if self.check_small_board_win(i, j, 0) and self.check_small_board_win(i, j, 1) and self.check_small_board_win(i, j, 2):
-					return self.win
-			for j in range(3):
-				if self.check_small_board_win(i, 0, j) and self.check_small_board_win(i, 1, j) and self.check_small_board_win(i, 2, j):
-					return self.win
-			if self.check_small_board_win(i, 0, 0) and self.check_small_board_win(i, 1, 1) and self.check_small_board_win(i, 2, 2):
-				return self.win
-			if self.check_small_board_win(i, 0, 2) and self.check_small_board_win(i, 1, 1) and self.check_small_board_win(i, 2, 0):
-				return self.win
-		
-		for i in range(2):
-			for j in range(3):
-				for k in range(3):
-					res = self.check_small_board_win(i, j, k)
-					if res:
-						if j == 2 and k == 2:
-							score = score + 3
-						elif (j == 0 and k == 0) or (j == 0 and k == 2) or (j == 2 and k == 0) or (j ==2 and k == 2):
-							score = score + 4
-						else:
-							score = score + 6
-        ###################################################################################################################
-		my_score = score
-        ############################################# OPPONENT SCORE ########################################################
-		score = 0
-		for i in range(2):
-			for j in range(3):
-				for k in range(3):
-					res = self.check_small_board_loss(i, j, k)
-					if res:
-						if j == 1 and k == 1:
-							score = score + 3
-						elif (j == 0 and k == 0) or (j == 0 and k == 2) or (j == 2 and k == 0) or (j ==2 and k == 2):
-							score = score + 4
-						else:
-							score = score + 6
-		#####################################################################################################################
-		return (my_score - score)	
-	
-	def minimax(self, depth, old_move, alpha, beta):
-		if self.board.find_terminal_state()[0] == self.my_symbol:
-			return self.win
-		if self.board.find_terminal_state()[0] == self.opp_symbol:
-			return self.loss
-		if depth == self.cutoff_depth:
-			return self.heuristic()
-		if depth % 2 == 0:
-			# Maximizing Player
+		while (self.curr_time - self.start_time) <= self.cutoff_time:
+			alpha = -self.inf
+			beta = self.inf
 			bestVal = -self.inf
-			cells = self.board.find_valid_move_cells(old_move)
+			best_move = []
+
+
 			for move in cells:
+
+				self.curr_time = time.time()
+				if ((self.curr_time - self.start_time) >= self.cutoff_time):
+					self.time_out = 1
+					break
+
 				i = move[0]
 				j = move[1]
 				k = move[2]
+				# self.board.big_boards_status[i][j][k] = self.my_symbol
 				temp = copy.deepcopy(self.board.small_boards_status)
 				bonus_move = self.board.update(old_move, move, self.my_symbol)[1]
-				#self.board.big_boards_status[i][j][k] = self.my_symbol
-				if bonus_move == True:
-					bestVal = max(bestVal, self.minimax(depth, move, alpha, beta))
-				else:
-					bestVal = max(bestVal, self.minimax(depth + 1, move, alpha, beta))
-					
-				# Undo move
-				self.board.big_boards_status[i][j][k] = '-' 
-				self.board.small_boards_status = temp
+				self.hashVal = self.hashVal ^ self.randBigBoard[i][j][k][0]
 
+				if(bonus_move is True and cons == 0):
+					val = self.minimax(1, move, alpha, beta, 0, 1)
+				else:
+					val = self.minimax(1, move, alpha, beta, 1, 0)
+
+				# Undo move
+				self.board.big_boards_status[i][j][k] = '-'
+				self.board.small_boards_status = temp
+				self.hashVal = self.hashVal ^ self.randBigBoard[i][j][k][0]
+				bestVal = max(bestVal, val)
+
+				# if bestVal == self.win:
+				# 	return move
+
+				if bestVal > alpha:
+					alpha = bestVal
+					best_move = move
+				if beta <= alpha:
+					break
+
+
+			moves.append(best_move)
+			scores.append(bestVal)
+			self.cutoff_depth = self.cutoff_depth + 1
+
+
+		l = len(moves)
+		print scores
+		print moves
+		if self.time_out == 1:
+			return moves[l - 2]
+		else:
+			return moves[l - 1]
+
+
+	def check_small_board_status(self,move):
+		"""
+		Function returns if this move results in a win of any small board , and return winning player symbol if so
+		"""
+
+		# Indices in board array of the top left corner
+		x = move[1]/3
+		x = x*3
+		y = move[2]/3
+		y = y*3
+		k = move[0]
+
+		board = self.board.big_boards_status[k]
+
+		pos_x = move[1]%3
+		pos_y = move[2]%3
+
+
+        # Corner squares of the x,y'th small board
+		if (pos_x%2) == 0 and (pos_y%2) == 0:
+
+			# Rows of cell
+			if board[x][y + pos_y] == board[x + 1][y + pos_y] and board[x + 1][y + pos_y] == board[x + 2][y + pos_y]:
+				return board[x + pos_x][y + pos_y]
+
+			# Column of cell
+			if board[x + pos_x][y] == board[x + pos_x][y + 1] and board[x + pos_x][y + 1] == board[x + pos_x][y + 2]:
+				return board[x + pos_x][y + pos_y]
+            
+
+			# Diagonal 1 (negative slope)
+			if pos_x == pos_y:
+				if board[x][y] == board[x + 1][y + 1] and board[x + 1][y + 1] == board[x + 2][y + 2]:
+					return board[x + pos_x][y + pos_y]
+
+			else:
+				if (board[x][y+2] == board[x+1][y+1] and board[x+1][y+1] == board[x+2][y]):
+					return board[x + pos_x][y + pos_y]
+
+		# Edge squares
+		if (pos_x + pos_y)%2 == 1:
+			
+			# Rows of cell
+			if board[x][y + pos_y] == board[x + 1][y + pos_y] and board[x + 1][y + pos_y] == board[x + 2][y + pos_y]:
+			    return board[x + pos_x][y + pos_y]
+
+			# Column of cell
+			if board[x + pos_x][y] == board[x + pos_x][y + 1] and board[x + pos_x][y + 1] == board[x + pos_x][y + 2]:
+			    return board[x + pos_x][y + pos_y]
+
+		# Centre Cell
+		if (pos_x == 1 and pos_y ==1):
+
+			# Rows of cell
+			if board[x][y + pos_y] == board[x + 1][y + pos_y] and board[x + 1][y + pos_y] == board[x + 2][y + pos_y]:
+			    return board[x + pos_x][y + pos_y]
+
+			# Column of cell
+			if board[x + pos_x][y] == board[x + pos_x][y + 1] and board[x + pos_x][y + 1] == board[x + pos_x][y + 2]:
+			    return board[x + pos_x][y + pos_y]
+
+			if board[x][y] == board[x + 1][y + 1] and board[x + 1][y + 1] == board[x + 2][y + 2]:
+				return board[x + pos_x][y + pos_y]
+
+			if (board[x][y+2] == board[x+1][y+1] and board[x+1][y+1] == board[x+2][y]):
+				return board[x + pos_x][y + pos_y]
+			
+
+		return 'd'
+
+	def small_block_eval(self, board, sym , opp):
+
+		v_flag = True
+		h_flag = True
+		h_count = 0
+		v_count = 0
+		score = 0
+
+		for i in range(3):
+			v_flag = True
+			h_flag = True
+			h_count = 0
+			v_count = 0
+
+
+			for j in range(3):
+				if(board[i][j] == sym):
+					h_count = h_count + 1
+
+				elif(board[i][j] == opp):
+					h_flag = False
+
+
+				if(board[j][i] == sym):
+					v_count = v_count + 1
+				elif(board[j][i] == opp):
+					v_flag = False
+
+			if(v_flag):
+				if(v_count == 3):
+					score = score + 100
+				elif(v_count == 2):
+					score = score + 20
+				elif(v_count == 1):
+					score = score + 5
+
+			if(h_flag):
+				if(h_count == 3):
+					score = score + 100
+				elif(h_count == 2):
+					score = score + 20
+				elif(h_count == 1):
+					score = score + 5
+
+
+
+		d_flag = True
+		d_count = 0
+
+		for i in range(3):
+			if (board[i][i] == sym):
+				d_count = d_count + 1
+			elif(board[i][i] == opp):
+				d_flag = False
+
+		if(d_flag):
+			if(d_count == 3):
+				score = score + 100
+			elif(d_count == 2):
+				score = score + 20
+			elif(d_count == 1):
+				score = score + 5
+
+
+		return score 
+
+
+
+	def slice(self, board_no, start_row, end_row, start_col, end_col):
+		res = []
+		for i in range(start_row, end_row):
+			lis = []
+			for j in range(start_col, end_col):
+				lis.append(self.board.big_boards_status[board_no][i][j])
+			res.append(lis)
+
+		return res
+
+
+	def heuristic(self,move):
+		# Evaluate self.board
+
+		self.curr_time = time.time()
+		if ((self.curr_time - self.start_time) >= self.cutoff_time):
+			return 0
+
+
+		score = 0
+		if self.hashVal in self.hashScore:
+			return self.hashScore[self.hashVal]
+
+		# win = self.check_small_board_status(move)
+
+		for k in range(2):
+			for i in range(3):
+				for j in range(3):
+					if(self.board.small_boards_status[k][i][j] == '-'):
+						temp = self.slice(k,i*3,(i+1)*3,j*3,(j+1)*3)
+						score = score + (0.1)*self.small_block_eval(temp , self.my_symbol,self.opp_symbol)
+						score = score - (0.1)*self.small_block_eval(temp , self.opp_symbol,self.my_symbol)
+
+					# score = score + (0.1)*self.small_block_eval(self.board.big_boards_status[k][i*3:(i+1)*3][j*3:(j+1)*3] ,self.my_symbol,self.opp_symbol)
+					# score = score - (0.1)*self.small_block_eval(self.board.big_boards_status[k][i*3:(i+1)*3][j*3:(j+1)*3] ,self.opp_symbol,self.my_symbol)
+
+
+		for k in range(2):
+
+			res = []
+			for i in range(0, 3):
+				lis = []
+				for j in range(0, 3):
+					lis.append(self.board.small_boards_status[k][i][j])
+				res.append(lis)
+
+			score = score + 30*self.small_block_eval(res,self.my_symbol,'p')
+			score = score - 30*self.small_block_eval(res,self.opp_symbol,'p')
+
+
+		for k in range(2):
+			for i in range(9):
+				for j in range(9):
+					pos_x = i%3
+					pos_y = j%3
+					if(self.board.big_boards_status[k][i][j] == self.my_symbol):
+						# Corner
+						if(pos_x%2 == 0 and pos_y%2 == 0):
+							score = score + 0.002
+
+						# Centre
+						elif(pos_y == 1 and pos_y == 1):
+							score = score + 0.005
+		
+		self.hashScore[self.hashVal] = score
+		return score
+
+
+
+	def minimax(self, depth, old_move, alpha, beta, turn, cons):
+
+		if self.board.find_terminal_state()[0] == self.my_symbol:
+			return self.win*(165 - depth)
+		if self.board.find_terminal_state()[0] == self.opp_symbol:
+			return self.loss*(165 - depth)
+
+
+
+		self.curr_time = time.time()
+		if depth == self.cutoff_depth or (self.curr_time - self.start_time) >= self.cutoff_time:
+			self.time_out = 1
+			return self.heuristic(old_move)
+
+
+		if turn == 0:
+
+			# Maximizing Player
+			bestVal = -self.inf
+			cells = self.board.find_valid_move_cells(old_move)
+
+			for move in cells:
+				if (self.time_out == 1):
+					break
+				i = move[0]
+				j = move[1]
+				k = move[2]
+				self.hashVal = self.hashVal ^ self.randBigBoard[i][j][k][0]
+				temp = copy.deepcopy(self.board.small_boards_status)
+				bonus_move = self.board.update(old_move, move, self.my_symbol)[1]
+				if bonus_move == True and cons == 0:
+					bestVal = max(bestVal, self.minimax(depth + 1, move, alpha, beta, turn, 1))
+				else:
+					bestVal = max(bestVal, self.minimax(depth + 1, move, alpha, beta, 1 - turn, 0))
+
+				# Undo move
+				self.board.big_boards_status[i][j][k] = '-'
+				self.board.small_boards_status = temp
+				self.hashVal = self.hashVal ^ self.randBigBoard[i][j][k][0]
 				alpha = max(alpha, bestVal)
 				if beta <= alpha:
 					break
+
+
 			return bestVal
 		else:
 			# Minimizing Player
 			bestVal = self.inf
 			cells = self.board.find_valid_move_cells(old_move)
+
+
 			for move in cells:
+				if (self.time_out == 1):
+					break
 				i = move[0]
 				j = move[1]
 				k = move[2]
 				temp = copy.deepcopy(self.board.small_boards_status)
 				bonus_move = self.board.update(old_move, move, self.opp_symbol)[1]
-				#self.board.big_boards_status[i][j][k] = self.opp_symbol
-				if bonus_move == True:
-					bestVal = min(bestVal, self.minimax(depth, move, alpha, beta))
+				self.hashVal = self.hashVal ^ self.randBigBoard[i][j][k][1]
+				if bonus_move == True and cons == 0:
+					bestVal = min(bestVal, self.minimax(depth + 1, move, alpha, beta, turn, 1))
 				else:
-					bestVal = min(bestVal, self.minimax(depth + 1, move, alpha, beta))
-				
-				# Undo move
-				self.board.big_boards_status[i][j][k] = '-' 
-				self.board.small_boards_status = temp
+					bestVal = min(bestVal, self.minimax(depth + 1, move, alpha, beta, 1 - turn, 0))
 
+				# Undo move
+				self.board.big_boards_status[i][j][k] = '-'
+				self.board.small_boards_status = temp
+				self.hashVal = self.hashVal ^ self.randBigBoard[i][j][k][1]
 				beta = min(beta, bestVal)
 				if beta <= alpha:
 					break

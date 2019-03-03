@@ -12,12 +12,12 @@ Naming convention followed across the simulator is:
 ####### Import different versions #########
 from v1 import v1
 from v2 import v2
-from v3 import v3
+from v3 import Shrey2
 from v4 import v4
 from v5 import v5
 from v6 import v6
-from bot import Bot
 from v7 import v7
+from shreyas import Shrey
 ###########################################
 import sys
 import random
@@ -406,10 +406,10 @@ if __name__ == '__main__':
 		obj2 = v4()
 	elif option == '10':
 		obj1 = v6()
-		obj2 = Shreyas()
-	elif option == '11':
-		obj1 = Bot()
 		obj2 = v7()
+	elif option == '11':
+		obj1 = Shrey()
+		obj2 = Shrey2()
 	else:
 		print 'Invalid option'
 		sys.exit(1)
