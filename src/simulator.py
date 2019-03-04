@@ -18,6 +18,8 @@ from v6 import v6
 from v7 import v7
 from v8 import v8
 from v9 import v9
+from team33 import Team33
+from nishant import Bot
 ###########################################
 import sys
 import random
@@ -410,11 +412,15 @@ if __name__ == '__main__':
 		obj1 = v6()
 		obj2 = v7()
 	elif option == '11':
-		obj1 = v9()
-		obj2 = v8()
+		obj1 = Team33()
+		obj2 = Random_Player()
 	else:
 		print 'Invalid option'
 		sys.exit(1)
-	x = gameplay(obj1, obj2)
-	print "Player 1 points:", x[0] 
-	print "Player 2 points:", x[1]
+	for i in range(100):
+		x = gameplay(obj1, obj2)
+		print "Player 1 points:", x[0] 
+		print "Player 2 points:", x[1]
+		if x[1] >= x[0]:
+			print "Alert"
+			break

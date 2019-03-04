@@ -1,17 +1,17 @@
 ######################## Version Headers ######################################################
-import sys
+#import sys
 import random
-import signal
+#import signal
 import time
 import copy
-import traceback
+#import traceback
 
-TIME = 1000
-MAX_PTS = 86
+#TIME = 24
+#MAX_PTS = 86
 ################################################################################################
 
 
-class v9():
+class Team33():
 	def __init__(self):
 		#self.board = BigBoard()
 		self.cutoff_depth = 4
