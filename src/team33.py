@@ -42,7 +42,7 @@ class Team33():
 	def move(self, board, old_move, flag):
 
 		if(old_move[0] == -1 and old_move[1] == -1 and old_move[2] == -1):
-			print old_move
+			#print old_move
 			return (0,4,4)
 		self.start_time = time.time()
 		self.time_out = 0
@@ -130,12 +130,12 @@ class Team33():
 
 
 		l = len(moves)
-		print scores
-		print moves
+		#print scores
+		#print moves
 
 		if self.time_out == 1:
 			if moves[l - 2] == []:
-				print '-----------------------HAPPENED---------------------'
+				#print '-----------------------HAPPENED---------------------'
 				return moves[0]
 			else:
 				return moves[l-2]
