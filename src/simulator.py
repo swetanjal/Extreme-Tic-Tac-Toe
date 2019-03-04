@@ -12,12 +12,12 @@ Naming convention followed across the simulator is:
 ####### Import different versions #########
 from v1 import v1
 from v2 import v2
-from v3 import Shrey2
 from v4 import v4
 from v5 import v5
 from v6 import v6
 from v7 import v7
-from shreyas import Shrey
+from v8 import v8
+from v9 import v9
 ###########################################
 import sys
 import random
@@ -115,6 +115,8 @@ class BigBoard:
 								allowed_cells.append((k,i,j))
 
 		return allowed_cells	
+
+
 
 	def find_terminal_state(self):
 		#checks if the game is over(won or drawn) and returns the player who have won the game or the player who has higher small_boards in case of a draw
@@ -408,8 +410,8 @@ if __name__ == '__main__':
 		obj1 = v6()
 		obj2 = v7()
 	elif option == '11':
-		obj1 = Shrey()
-		obj2 = Shrey2()
+		obj1 = v9()
+		obj2 = v8()
 	else:
 		print 'Invalid option'
 		sys.exit(1)

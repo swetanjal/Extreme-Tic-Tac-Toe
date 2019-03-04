@@ -11,11 +11,11 @@ MAX_PTS = 86
 ################################################################################################
 
 
-class Shrey():
+class v8():
 	def __init__(self):
 		#self.board = BigBoard()
-		self.cutoff_depth = 5
-		self.cutoff_time = 15
+		self.cutoff_depth = 3
+		self.cutoff_time = 18
 		self.my_symbol = 'x'  # I am playing with symbol
 		self.opp_symbol = 'o'
 		self.inf = long(1000000000000000000)
@@ -29,6 +29,8 @@ class Shrey():
 		self.hashScore = {}
 		self.hashVal = 0
 		self.hash_init()
+
+
 	def hash_init(self):
 		for i in range(2):
 			for j in range(9):
@@ -52,6 +54,7 @@ class Shrey():
 			self.my_symbol = 'o'
 			self.opp_symbol = 'x'
 		############ Hashing ##############
+		self.hashVal = 0
 		for i in range(2):
 			for j in range(9):
 				for k in range(9):
@@ -75,13 +78,29 @@ class Shrey():
 			beta = self.inf
 			bestVal = -self.inf
 			best_move = []
+
+
 			for move in cells:
+
+				now = time.time()
+
+				if (now - self.start_time) >= self.cutoff_time:
+					self.time_out = 1
+					break
+
+
+				if(len(self.hashScore) > 1000000):
+					self.hashScore = {}
+
+
 				i = move[0]
 				j = move[1]
 				k = move[2]
 				# self.board.big_boards_status[i][j][k] = self.my_symbol
 				temp = copy.deepcopy(self.board.small_boards_status)
 				bonus_move = self.board.update(old_move, move, self.my_symbol)[1]
+
+
 				self.hashVal = self.hashVal ^ self.randBigBoard[i][j][k][0]
 
 				if(bonus_move is True and cons == 0):
@@ -113,81 +132,18 @@ class Shrey():
 		l = len(moves)
 		print scores
 		print moves
+
 		if self.time_out == 1:
-			return moves[l - 2]
+			if moves[l - 2] == []:
+				print '-----------------------HAPPENED-------------------'
+				return moves[0]
+			else:
+				return moves[l-2]
+		
 		else:
 			return moves[l - 1]
 
 
-	def check_small_board_status(self,move):
-		"""
-		Function returns if this move results in a win of any small board , and return winning player symbol if so
-		"""
-
-		# Indices in board array of the top left corner
-		x = move[1]/3
-		x = x*3
-		y = move[2]/3
-		y = y*3
-		k = move[0]
-
-		board = self.board.big_boards_status[k]
-
-		pos_x = move[1]%3
-		pos_y = move[2]%3
-
-
-        # Corner squares of the x,y'th small board
-		if (pos_x%2) == 0 and (pos_y%2) == 0:
-
-			# Rows of cell
-			if board[x][y + pos_y] == board[x + 1][y + pos_y] and board[x + 1][y + pos_y] == board[x + 2][y + pos_y]:
-				return board[x + pos_x][y + pos_y]
-
-			# Column of cell
-			if board[x + pos_x][y] == board[x + pos_x][y + 1] and board[x + pos_x][y + 1] == board[x + pos_x][y + 2]:
-				return board[x + pos_x][y + pos_y]
-            
-
-			# Diagonal 1 (negative slope)
-			if pos_x == pos_y:
-				if board[x][y] == board[x + 1][y + 1] and board[x + 1][y + 1] == board[x + 2][y + 2]:
-					return board[x + pos_x][y + pos_y]
-
-			else:
-				if (board[x][y+2] == board[x+1][y+1] and board[x+1][y+1] == board[x+2][y]):
-					return board[x + pos_x][y + pos_y]
-
-		# Edge squares
-		if (pos_x + pos_y)%2 == 1:
-			
-			# Rows of cell
-			if board[x][y + pos_y] == board[x + 1][y + pos_y] and board[x + 1][y + pos_y] == board[x + 2][y + pos_y]:
-			    return board[x + pos_x][y + pos_y]
-
-			# Column of cell
-			if board[x + pos_x][y] == board[x + pos_x][y + 1] and board[x + pos_x][y + 1] == board[x + pos_x][y + 2]:
-			    return board[x + pos_x][y + pos_y]
-
-		# Centre Cell
-		if (pos_x == 1 and pos_y ==1):
-
-			# Rows of cell
-			if board[x][y + pos_y] == board[x + 1][y + pos_y] and board[x + 1][y + pos_y] == board[x + 2][y + pos_y]:
-			    return board[x + pos_x][y + pos_y]
-
-			# Column of cell
-			if board[x + pos_x][y] == board[x + pos_x][y + 1] and board[x + pos_x][y + 1] == board[x + pos_x][y + 2]:
-			    return board[x + pos_x][y + pos_y]
-
-			if board[x][y] == board[x + 1][y + 1] and board[x + 1][y + 1] == board[x + 2][y + 2]:
-				return board[x + pos_x][y + pos_y]
-
-			if (board[x][y+2] == board[x+1][y+1] and board[x+1][y+1] == board[x+2][y]):
-				return board[x + pos_x][y + pos_y]
-			
-
-		return 'd'
 
 	def small_block_eval(self, board, sym , opp):
 
@@ -270,11 +226,15 @@ class Shrey():
 
 	def heuristic(self,move):
 		# Evaluate self.board
+
+		self.curr_time = time.time()
+		if ((self.curr_time - self.start_time) >= self.cutoff_time):
+			return 0
+
+
 		score = 0
 		if self.hashVal in self.hashScore:
 			return self.hashScore[self.hashVal]
-
-		# win = self.check_small_board_status(move)
 
 		for k in range(2):
 			for i in range(3):
@@ -283,9 +243,6 @@ class Shrey():
 						temp = self.slice(k,i*3,(i+1)*3,j*3,(j+1)*3)
 						score = score + (0.1)*self.small_block_eval(temp , self.my_symbol,self.opp_symbol)
 						score = score - (0.1)*self.small_block_eval(temp , self.opp_symbol,self.my_symbol)
-
-					# score = score + (0.1)*self.small_block_eval(self.board.big_boards_status[k][i*3:(i+1)*3][j*3:(j+1)*3] ,self.my_symbol,self.opp_symbol)
-					# score = score - (0.1)*self.small_block_eval(self.board.big_boards_status[k][i*3:(i+1)*3][j*3:(j+1)*3] ,self.opp_symbol,self.my_symbol)
 
 
 		for k in range(2):
@@ -323,9 +280,9 @@ class Shrey():
 	def minimax(self, depth, old_move, alpha, beta, turn, cons):
 
 		if self.board.find_terminal_state()[0] == self.my_symbol:
-			return self.win*(20 - depth)
+			return self.win*(165 - depth)
 		if self.board.find_terminal_state()[0] == self.opp_symbol:
-			return self.loss*(20 - depth)
+			return self.loss*(165 - depth)
 
 
 
@@ -333,11 +290,14 @@ class Shrey():
 		if depth == self.cutoff_depth or (self.curr_time - self.start_time) >= self.cutoff_time:
 			self.time_out = 1
 			return self.heuristic(old_move)
+
+
 		if turn == 0:
 
 			# Maximizing Player
 			bestVal = -self.inf
 			cells = self.board.find_valid_move_cells(old_move)
+
 			for move in cells:
 				i = move[0]
 				j = move[1]
@@ -357,6 +317,8 @@ class Shrey():
 				alpha = max(alpha, bestVal)
 				if beta <= alpha:
 					break
+
+
 			return bestVal
 		else:
 			# Minimizing Player
