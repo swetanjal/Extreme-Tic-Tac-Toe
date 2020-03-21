@@ -1,6 +1,6 @@
 # Extreme Tic Tac Toe
 
-This bot was built by me and [Shreyas Shankar](https://github.com/shreyks) as a part of our Artificial Intelligence course at IIIT-H. This bot took part in a tournament of Extreme Tic Tac Toe and placed $4^{th}$ among $80$ teams. 
+This bot was built by me and [Shreyas Shankar](https://github.com/shreyks) as a part of our Artificial Intelligence course at IIIT-H. It took part in a tournament of Extreme Tic Tac Toe and placed fourth among 80 teams. 
 
 ### Rules of Extreme Tic Tac Toe:
 - Refer to the file [Description.pdf](https://github.com/swetanjal/Extreme-Tic-Tac-Toe/blob/master/Description.pdf) for the detailed rules of this game which is a modified and harder version of the classical game of Tic Tac Toe.
